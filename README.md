@@ -55,41 +55,65 @@ docker run -d \
   lidarr-progress
 ```
 
-A `docker-compose.yml` is also included if you prefer Compose.
+A `docker-compose.yml` is also included if you prefer Compose — see the
+Dokploy section below for the two ways to wire it into your existing
+Jellyfin/Lidarr stack.
 
 ## Deploying on Dokploy
 
-1. **Create the app.** In your Dokploy dashboard, go to the project that
-   already has Jellyfin and Lidarr in it, and add a new application. You can
-   use either:
-   - **Dockerfile / Application** type, pointing at this GitHub repo (Dokploy
-     will build the included `Dockerfile`), or
-   - **Docker Compose** type, pointing at this repo's `docker-compose.yml`.
-2. **Set environment variables** on the new app in Dokploy:
-   - `LIDARR_URL`
+You have two ways to fit this into your existing Jellyfin/Lidarr setup,
+depending on how that stack is defined in Dokploy.
+
+### Option A — Add it to your existing Compose file (simplest)
+
+If your Jellyfin + Lidarr setup in Dokploy is itself one **Docker Compose**
+app (one `docker-compose.yml` with multiple `services:`), the easiest path
+is to copy the `lidarr-progress` service block from this repo's
+`docker-compose.yml` straight into *that* file, alongside your `jellyfin`
+and `lidarr` services. Services in the same Compose file share a network
+automatically, so `LIDARR_URL=http://lidarr:8686` (using whatever your
+Lidarr service is named in that file) will just work — no extra networking
+config needed. You'd just add the `LIDARR_URL`/`LIDARR_API_KEY` env vars to
+that stack and redeploy it.
+
+### Option B — Deploy this repo as its own app
+
+If you'd rather keep this as a separate app in Dokploy (pointing at this
+GitHub repo, so it updates independently), use this repo's
+`docker-compose.yml` as-is:
+
+1. **Find your existing network name.** In Dokploy, open your Lidarr
+   service and look for its network name (usually under the service's
+   **Advanced**/**Network** tab, or you can run `docker network ls` and
+   `docker inspect <lidarr-container>` on the host to find which network
+   it's attached to).
+2. **Create the app.** Add a new application in Dokploy, type **Docker
+   Compose**, pointing at this GitHub repo (it will use the included
+   `docker-compose.yml`).
+3. **Set environment variables** on the new app:
+   - `LIDARR_URL` — e.g. `http://lidarr:8686` (the Lidarr service's name on
+     that network)
    - `LIDARR_API_KEY`
+   - `LIDARR_NETWORK` — the network name you found in step 1. The compose
+     file joins this network (in addition to its own) so it can resolve
+     `lidarr` by name.
    - (optional) `PORT`
-3. **Networking to Lidarr.** Because this app lives in the *same Dokploy
-   project* as Lidarr, it should be able to reach Lidarr over Dokploy's
-   internal Docker network using Lidarr's service name as the hostname —
-   for example `http://lidarr:8686` (swap `lidarr` for whatever your Lidarr
-   service is actually called in that project). This means you do **not**
-   need to expose Lidarr's port to the internet just for this dashboard to
-   work.
-   - If that hostname doesn't resolve, check the service name Dokploy gave
-     your Lidarr container (visible in its service settings), or fall back to
-     your server's LAN IP + Lidarr's port.
-4. **Expose the dashboard.** Give the app a domain or port mapping in Dokploy
-   like you would for any other service (e.g. `progress.yourdomain.com`, or a
-   port like `8080` if you're accessing it via IP). Nothing else needs a
-   public port — only the dashboard itself.
-5. **Deploy.** Dokploy will build the image and start the container. Open the
-   dashboard URL — you should see your library's progress within a few
+4. **Expose the dashboard.** Give the app a domain or port mapping in
+   Dokploy like any other service (e.g. `progress.yourdomain.com`, or just
+   port `8080` if you're accessing it via IP). Nothing else needs a public
+   port — only the dashboard itself.
+5. **Deploy.** Dokploy will build the image and start the container. Open
+   the dashboard URL — you should see your library's progress within a few
    seconds.
 
+If you're unsure which option applies, Option A is less to configure and
+guaranteed to have working networking, since it rides on the same Compose
+file as Lidarr itself.
+
 If the dashboard shows a "Connection error" banner, it means the server
-couldn't reach Lidarr or the API key was rejected — double-check `LIDARR_URL`
-and `LIDARR_API_KEY` in the Dokploy environment settings.
+couldn't reach Lidarr or the API key was rejected — double check
+`LIDARR_URL`/`LIDARR_API_KEY` (and, for Option B, `LIDARR_NETWORK`) in the
+Dokploy environment settings.
 
 ## Ideas for later
 

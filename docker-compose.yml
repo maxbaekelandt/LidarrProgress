@@ -10,3 +10,15 @@ services:
       PORT: 8080
     ports:
       - "8080:8080"
+    networks:
+      - default
+      - lidarr-net
+
+# Joins the same Docker network your Jellyfin/Lidarr stack uses so it can
+# reach Lidarr by service name (e.g. http://lidarr:8686). Set LIDARR_NETWORK
+# in your .env to that network's actual name (see README for how to find
+# it) — this network must already exist, created by your other stack.
+networks:
+  lidarr-net:
+    external: true
+    name: ${LIDARR_NETWORK}
