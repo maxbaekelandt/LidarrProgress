@@ -9,7 +9,7 @@ services:
       LIDARR_API_KEY: ${LIDARR_API_KEY}
       PORT: 8080
     ports:
-      - "8080:8080"
+      - "8420:8080"
     networks:
       - default
       - lidarr-net

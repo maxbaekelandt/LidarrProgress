@@ -45,11 +45,15 @@ Then open http://localhost:8080.
 
 ## Deploying with Docker
 
+The container listens on port `8080` internally, but you can map it to
+whatever free port you like on the host — e.g. `8420`, to avoid clashing
+with qBittorrent's default `8080`:
+
 ```bash
 docker build -t lidarr-progress .
 docker run -d \
   --name lidarr-progress \
-  -p 8080:8080 \
+  -p 8420:8080 \
   -e LIDARR_URL=http://lidarr:8686 \
   -e LIDARR_API_KEY=your-api-key \
   lidarr-progress
@@ -100,8 +104,10 @@ GitHub repo, so it updates independently), use this repo's
    - (optional) `PORT`
 4. **Expose the dashboard.** Give the app a domain or port mapping in
    Dokploy like any other service (e.g. `progress.yourdomain.com`, or just
-   port `8080` if you're accessing it via IP). Nothing else needs a public
-   port — only the dashboard itself.
+   a host port like `8420` if you're accessing it via IP — pick anything
+   free; the container listens on `8080` internally regardless of the host
+   port you map it to). Nothing else needs a public port — only the
+   dashboard itself.
 5. **Deploy.** Dokploy will build the image and start the container. Open
    the dashboard URL — you should see your library's progress within a few
    seconds.
