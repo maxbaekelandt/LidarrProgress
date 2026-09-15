@@ -4,6 +4,9 @@ A small self-hosted dashboard that shows the overall download progress of your
 Lidarr music library — not just one artist, but the whole library — plus
 active downloads and a per-artist breakdown.
 
+> This project was entirely vibe-coded with [Claude Code](https://claude.com/claude-code) —
+> built, tested, and deployed through conversation rather than hand-written.
+
 It works by having a tiny Node.js server talk to your Lidarr instance's API
 (server-side, so your API key never reaches the browser) and serving a
 dashboard page that polls that server every 15 seconds.
