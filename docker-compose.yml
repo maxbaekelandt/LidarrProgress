@@ -1,0 +1,12 @@
+services:
+  lidarr-progress:
+    build: .
+    image: lidarr-progress:latest
+    container_name: lidarr-progress
+    restart: unless-stopped
+    environment:
+      LIDARR_URL: ${LIDARR_URL}
+      LIDARR_API_KEY: ${LIDARR_API_KEY}
+      PORT: 8080
+    ports:
+      - "8080:8080"

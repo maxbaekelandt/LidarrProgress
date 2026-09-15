@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lidarr Progress</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1>🎧 Lidarr Progress</h1>
+      <div class="topbar-status">
+        <span id="statusPill" class="pill pill-unknown">Connecting…</span>
+        <span id="updatedAt" class="updated-at"></span>
+        <button id="refreshBtn" class="btn" title="Refresh now">↻ Refresh</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="app">
+    <div id="errorBanner" class="banner banner-error" hidden></div>
+
+    <section class="overall-card" id="overallCard">
+      <div class="overall-top">
+        <div>
+          <div class="overall-label">Library Progress</div>
+          <div class="overall-percent"><span id="overallPercent">--</span>%</div>
+        </div>
+        <div class="overall-sub" id="overallSub">-- of -- tracks downloaded</div>
+      </div>
+      <div class="progress-track progress-large">
+        <div class="progress-fill" id="overallFill" style="width: 0%"></div>
+      </div>
+    </section>
+
+    <section class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="statArtists">--</div>
+        <div class="stat-label">Artists</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statAlbums">--</div>
+        <div class="stat-label">Albums</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statMissing">--</div>
+        <div class="stat-label">Missing Albums</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statSize">--</div>
+        <div class="stat-label">Size on Disk</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Active Downloads</h2>
+        <span class="badge" id="queueCount">0</span>
+      </div>
+      <div id="queueEmpty" class="empty-state">No active downloads right now.</div>
+      <div class="table-wrap" id="queueTableWrap" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Artist</th>
+              <th>Status</th>
+              <th>Progress</th>
+              <th>Time Left</th>
+            </tr>
+          </thead>
+          <tbody id="queueBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Artists</h2>
+        <input id="artistSearch" class="search-input" type="search" placeholder="Search artists…" />
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="name" class="sortable">Artist</th>
+              <th data-sort="albumCount" class="sortable">Albums</th>
+              <th data-sort="trackFileCount" class="sortable">Tracks</th>
+              <th data-sort="percent" class="sortable">Progress</th>
+              <th data-sort="sizeOnDisk" class="sortable">Size</th>
+            </tr>
+          </thead>
+          <tbody id="artistBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Auto-refreshes every 15s</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

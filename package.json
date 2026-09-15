@@ -1,0 +1,16 @@
+{
+  "name": "lidarr-progress",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dashboard for tracking overall Lidarr library download progress",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
