@@ -47,10 +47,19 @@ async function fetchJson(path) {
 }
 
 function renderSummary(summary) {
+  const completePercent = Math.min(summary.completePercent, 100);
+  const inProgressPercent = Math.max(Math.min(summary.percentComplete, 100) - completePercent, 0);
+
   el('overallPercent').textContent = summary.percentComplete.toFixed(1);
-  el('overallFill').style.width = `${Math.min(summary.percentComplete, 100)}%`;
-  el('overallSub').textContent =
-    `${formatNumber(summary.totalTrackFiles)} of ${formatNumber(summary.totalTracks)} tracks downloaded`;
+  el('overallFill').style.width = `${completePercent}%`;
+  el('overallFillInProgress').style.width = `${inProgressPercent}%`;
+
+  let subText = `${formatNumber(summary.totalTrackFiles)} of ${formatNumber(summary.totalTracks)} tracks downloaded`;
+  if (summary.tracksInProgress > 0) {
+    subText += `, ~${formatNumber(summary.tracksInProgress)} downloading now`;
+  }
+  el('overallSub').textContent = subText;
+  el('overallLegend').hidden = summary.tracksInProgress <= 0;
 
   el('statArtists').textContent = formatNumber(summary.totalArtists);
   el('statAlbums').textContent = formatNumber(summary.totalAlbums);

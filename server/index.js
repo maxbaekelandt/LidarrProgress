@@ -19,9 +19,10 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/summary', async (req, res) => {
   try {
-    const [artists, missing] = await Promise.all([
+    const [artists, missing, queue] = await Promise.all([
       lidarrFetch('/api/v1/artist'),
       lidarrFetch('/api/v1/wanted/missing?pageSize=1&page=1').catch(() => ({ totalRecords: null })),
+      lidarrFetch('/api/v1/queue?pageSize=100').catch(() => ({ records: [] })),
     ]);
 
     let totalAlbums = 0;
@@ -39,7 +40,20 @@ app.get('/api/summary', async (req, res) => {
       if (a.monitored) monitoredArtists += 1;
     }
 
-    const percentComplete = totalTracks > 0 ? (totalTrackFiles / totalTracks) * 100 : 0;
+    // Estimate how many "tracks worth" of progress is sitting in currently
+    // active downloads, using the library's own average track size. This lets
+    // partially-downloaded (but not yet imported) tracks contribute partial
+    // credit to the overall bar, instead of only counting on full import.
+    const avgTrackSizeBytes = totalTrackFiles > 0 ? sizeOnDisk / totalTrackFiles : 0;
+    const downloadingBytes = (queue.records || []).reduce(
+      (sum, r) => sum + Math.max((r.size || 0) - (r.sizeleft || 0), 0),
+      0
+    );
+    const tracksInProgress = avgTrackSizeBytes > 0 ? downloadingBytes / avgTrackSizeBytes : 0;
+    const effectiveTrackFiles = Math.min(totalTrackFiles + tracksInProgress, totalTracks);
+
+    const completePercent = totalTracks > 0 ? (totalTrackFiles / totalTracks) * 100 : 0;
+    const percentComplete = totalTracks > 0 ? (effectiveTrackFiles / totalTracks) * 100 : 0;
 
     res.json({
       totalArtists: artists.length,
@@ -47,7 +61,9 @@ app.get('/api/summary', async (req, res) => {
       totalAlbums,
       totalTracks,
       totalTrackFiles,
+      completePercent: Math.round(completePercent * 10) / 10,
       percentComplete: Math.round(percentComplete * 10) / 10,
+      tracksInProgress: Math.round(tracksInProgress),
       sizeOnDisk,
       missingAlbums: typeof missing.totalRecords === 'number' ? missing.totalRecords : null,
       updatedAt: new Date().toISOString(),
