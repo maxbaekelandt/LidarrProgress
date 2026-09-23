@@ -138,7 +138,7 @@ function renderArtists() {
       <tr>
         <td>${escapeHtml(a.name)}${a.monitored ? '' : ' <span style="color:var(--text-muted)">(unmonitored)</span>'}</td>
         <td>${formatNumber(a.albumCount)}</td>
-        <td>${formatNumber(a.trackFileCount)}/${formatNumber(a.totalTrackCount)}</td>
+        <td>${formatNumber(a.trackFileCount)}/${formatNumber(a.trackCount)}</td>
         <td>${progressCell(a.percent)}</td>
         <td>${formatBytes(a.sizeOnDisk)}</td>
       </tr>`

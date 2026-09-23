@@ -34,7 +34,12 @@ app.get('/api/summary', async (req, res) => {
     for (const a of artists) {
       const stats = a.statistics || {};
       totalAlbums += stats.albumCount || 0;
-      totalTracks += stats.totalTrackCount || 0;
+      // trackCount = monitored tracks only. totalTrackCount includes every
+      // track Lidarr knows about, including unmonitored albums/releases
+      // that were never going to be downloaded — using it here would dilute
+      // the percentage with tracks nobody wants. This matches how Lidarr
+      // itself computes PercentOfTracks.
+      totalTracks += stats.trackCount || 0;
       totalTrackFiles += stats.trackFileCount || 0;
       sizeOnDisk += stats.sizeOnDisk || 0;
       if (a.monitored) monitoredArtists += 1;
@@ -78,16 +83,16 @@ app.get('/api/artists', async (req, res) => {
     const artists = await lidarrFetch('/api/v1/artist');
     const simplified = artists.map((a) => {
       const stats = a.statistics || {};
-      const totalTrackCount = stats.totalTrackCount || 0;
+      const trackCount = stats.trackCount || 0;
       const trackFileCount = stats.trackFileCount || 0;
-      const percent = totalTrackCount > 0 ? (trackFileCount / totalTrackCount) * 100 : 0;
+      const percent = trackCount > 0 ? (trackFileCount / trackCount) * 100 : 0;
       return {
         id: a.id,
         name: a.artistName,
         monitored: a.monitored,
         albumCount: stats.albumCount || 0,
         trackFileCount,
-        totalTrackCount,
+        trackCount,
         sizeOnDisk: stats.sizeOnDisk || 0,
         percent: Math.round(percent * 10) / 10,
       };
